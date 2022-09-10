@@ -1,7 +1,6 @@
 import java.util.List;
 
 public class Order {
-
     public final String firstName;
     public final String lastName;
     public final String address;

@@ -15,7 +15,13 @@ import static org.hamcrest.core.Is.is;
 
 @DisplayName("Тесты создания курьера")
 public class TestCreateCourier {
-
+    private Response response(File json) {
+        return given().header("Content-type", "application/json")
+                .and()
+                .body(json)
+                .when()
+                .post("/api/v1/courier");
+    }
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://qa-scooter.praktikum-services.ru";
@@ -26,13 +32,7 @@ public class TestCreateCourier {
     @Description("Так же покрывает тест создания курьера с передачей всех обязательных полей")
     public void testCourierCanBeCreated() {
         File json = new File("src/test/resources/courierFull.json");
-        Response response =
-                given().header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier");
-        response.then().assertThat()
+        response(json).then().assertThat()
                 .statusCode(201)
                 .and()
                 .body("ok", is(true));
@@ -43,18 +43,8 @@ public class TestCreateCourier {
     @Description("Так же покрывает тест создания курьера с существующим логином")
     public void testCreatingTwoIdenticalCouriers() {
         File json = new File("src/test/resources/courierFull.json");
-        given().header("Content-type", "application/json")
-                .and()
-                .body(json)
-                .when()
-                .post("/api/v1/courier");
-        Response response =
-                given().header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier");
-        response.then().assertThat()
+        response(json);
+        response(json).then().assertThat()
                 .statusCode(409)
                 .and()
                 .body("code", equalTo(409))
@@ -66,13 +56,7 @@ public class TestCreateCourier {
     @DisplayName("Тест возможности создания курьера без поля login")
     public void testCourierCanBeCreatedWithoutLogin() {
         File json = new File("src/test/resources/courierWithoutLogin.json");
-        Response response =
-                given().header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier");
-        response.then().assertThat()
+        response(json).then().assertThat()
                 .statusCode(400)
                 .and()
                 .body("code", equalTo(400))
@@ -84,13 +68,7 @@ public class TestCreateCourier {
     @DisplayName("Тест возможности создания курьера без поля password")
     public void testCourierCanBeCreatedWithoutPassword() {
         File json = new File("src/test/resources/courierWithoutPassword.json");
-        Response response =
-                given().header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier");
-        response.then().assertThat()
+        response(json).then().assertThat()
                 .statusCode(400)
                 .and()
                 .body("code", equalTo(400))
@@ -102,13 +80,7 @@ public class TestCreateCourier {
     @DisplayName("Тест возможности создания курьера без поля firstName")
     public void testCourierCanBeCreatedWithoutFirstName() {
         File json = new File("src/test/resources/courierWithoutFirstName.json");
-        Response response =
-                given().header("Content-type", "application/json")
-                        .and()
-                        .body(json)
-                        .when()
-                        .post("/api/v1/courier");
-        response.then().assertThat()
+        response(json).then().assertThat()
                 .statusCode(201)
                 .and()
                 .body("ok", is(true));
@@ -123,14 +95,14 @@ public class TestCreateCourier {
                         .body(json)
                         .when()
                         .post("/api/v1/courier/login");
-        Integer statusId = responseId.statusCode();
+        int statusId = responseId.statusCode();
         if (statusId == 200) {
             JsonPath jsonPathEvaluator = responseId.jsonPath();
             String id = jsonPathEvaluator.get("id").toString();
             Response responseDelete =
                     given().when()
                             .delete("/api/v1/courier/" + id);
-            Integer statusDelete = responseDelete.statusCode();
+            int statusDelete = responseDelete.statusCode();
             if (statusDelete != 200) {
                 System.out.println("Не удалось удалить курьера");
             }
